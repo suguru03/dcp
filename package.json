@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/_mocha -R spec ./test --recursive"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "lodash": "^4.13.1",
     "mocha": "^2.5.2"
   }
 }
