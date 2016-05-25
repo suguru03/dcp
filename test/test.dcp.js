@@ -29,13 +29,19 @@ describe('#define', function() {
 describe('#clone', function() {
 
   it('should copy deeply', function() {
-    var obj = {
+    var struct = {
       a: 1,
       b: [1, 2],
       c: { c1: 1, c2: '2'},
       d: { d1: { d11: 'test', d12: { d123: true } } }
     };
-    var clone = dcp.define('test', obj);
+    var obj = {
+      a: 2,
+      b: [3, 4],
+      c: { c1: 2, c2: '2'},
+      d: { d1: { d11: 'tes', d12: { d123: false } } }
+    };
+    var clone = dcp.define('test', struct);
     var newObj = clone(obj);
     assert.deepEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
@@ -86,14 +92,22 @@ describe('#clone', function() {
   });
 
   it('should get default value', function() {
-    var obj = {
+    var struct = {
       a: 1,
       b: 2,
       c: 3
     };
-    var clone = dcp.define('test', obj);
-    var newObj = clone({});
-    assert.deepEqual(newObj, obj);
+    var obj = {
+      a: 5,
+      c: 5
+    };
+    var clone = dcp.define('test', struct);
+    var newObj = clone(obj);
+    assert.deepEqual(newObj, {
+      a: 5,
+      b: 2,
+      c: 5
+    });
     assert.notStrictEqual(newObj, obj);
   });
 

@@ -56,8 +56,9 @@ function replace(str, value, exp) {
   return str && str.replace(exp || /%s/, value);
 }
 
-function resolveDefault(value) {
-  var str = ' || %s';
+function resolveValue(key, value) {
+  var str = '%k !== undefined ? %k : %s';
+  str = replace(str, key, /%k/g);
   switch (typeof value) {
     case 'string':
       return replace(str, '"' + value + '"');
@@ -82,10 +83,9 @@ function createFuncStr(obj, key, parentStr) {
   var type = typeof obj;
   if (type !== 'object') {
     if (!parentStr) {
-      return key + resolveDefault(obj);
+      return resolveValue(key, obj);
     }
-
-    return replace(parentStr, key + resolveDefault(obj));
+    return replace(parentStr, resolveValue(key, obj));
   }
   var isArray = Array.isArray(obj);
   var str = isArray ? '[%s],%s' : '{%s},%s';
