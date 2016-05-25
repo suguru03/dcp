@@ -70,4 +70,31 @@ describe('#clone', function() {
     assert.notStrictEqual(newObj, obj);
   });
 
+  it('should get clone function', function() {
+    var obj = {
+      a: {},
+      b: [],
+      c: [{}, { c1: { c2: {} } }],
+      d: false
+    };
+    dcp.define('test', obj);
+    var func = dcp.clone('test');
+    assert.strictEqual(typeof func, 'function');
+    var newObj = func(obj);
+    assert.deepEqual(newObj, obj);
+    assert.notStrictEqual(newObj, obj);
+  });
+
+  it('should get default value', function() {
+    var obj = {
+      a: 1,
+      b: 2,
+      c: 3
+    };
+    var clone = dcp.define('test', obj);
+    var newObj = clone({});
+    assert.deepEqual(newObj, obj);
+    assert.notStrictEqual(newObj, obj);
+  });
+
 });

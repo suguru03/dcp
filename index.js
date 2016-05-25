@@ -26,7 +26,7 @@ DeepCopy.prototype.define = function(key, obj) {
 
 DeepCopy.prototype.clone = function(key, obj) {
   var func = this._defined[key] || this.define(key, obj);
-  return func(obj);
+  return arguments.length === 1 ? func : func(obj);
 };
 
 DeepCopy.prototype.copy = DeepCopy.prototype.clone;
@@ -56,28 +56,24 @@ function replace(str, value, exp) {
   return str && str.replace(exp || /%s/, value);
 }
 
-function resolveDefault(type) {
+function resolveDefault(value) {
   var str = ' || %s';
-  switch (type) {
+  switch (typeof value) {
     case 'string':
-      return replace(str, '""');
-    case 'number':
-      return replace(str, 0);
-    case 'boolean':
-      return replace(str, false);
-    case 'null':
+      return replace(str, '"' + value + '"');
+    case 'object':
       return replace(str, null);
     default:
-      return '';
+      return replace(str, value);
   }
 }
 
 function analyze(obj) {
   if (obj === null) {
-    return 'null';
+    return null;
   }
   if (typeof obj !== 'object') {
-    return typeof obj;
+    return obj;
   }
   return map(obj, analyze);
 }
