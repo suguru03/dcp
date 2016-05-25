@@ -4,6 +4,8 @@
 
 var assert = require('assert');
 
+var _ = require('lodash');
+
 var dcp = require('../');
 
 beforeEach(function() {
@@ -49,6 +51,19 @@ describe('#clone', function() {
        ],
       [4, { d: { d1: function() {}}}, [5, { e: [false] } ] ]
     ];
+    var clone = dcp.define('test', obj);
+    var newObj = clone(obj);
+    assert.deepEqual(newObj, obj);
+    assert.notStrictEqual(newObj, obj);
+  });
+
+  it('should copy deep object', function() {
+    var count = 10;
+    var obj = _.mapValues(_.times(count), function(num) {
+      return _.mapValues(_.times(num), function(num) {
+        return _.mapValues(_.times(num));
+      });
+    });
     var clone = dcp.define('test', obj);
     var newObj = clone(obj);
     assert.deepEqual(newObj, obj);

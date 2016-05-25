@@ -99,7 +99,7 @@ function createFuncStr(obj, key, parentStr) {
     var pKey = key + '["' + cKey + '"]';
     str = createFuncStr(cObj, pKey, str);
   });
-  str = replace(str, '', /,%s/g);
+  str = replace(str, '', /(%s|,%s)/g);
   return replace(parentStr, str) || str;
 }
 
