@@ -64,14 +64,14 @@ function resolveKey(keys) {
   if (!l) {
     return replace(str, k);
   }
-  str = replace(str, '%s && %s');
+  str = replace(str, '%s&&%s');
   str = replace(str, k);
   key = replace(key, '%s["%s"]%s');
   key = replace(key, k);
   while (l--) {
     k = keys.shift();
     key = replace(key, k);
-    str = replace(str, l ? '%s && %s' : '%s');
+    str = replace(str, l ? '%s&&%s' : '%s');
     str = replace(str, replace(key, ''));
     key = replace(key, l ? '["%s"]%s' : '');
   }
@@ -79,7 +79,7 @@ function resolveKey(keys) {
 }
 
 function resolveValue(keys, value) {
-  var str = '%k !== undefined ? %k : %s';
+  var str = '%k!==undefined?%k:%s';
   str = replace(str, resolveKey(keys), /%k/g);
   switch (typeof value) {
     case 'string':
@@ -112,7 +112,7 @@ function createFuncStr(obj, keys, parentStr) {
   var isArray = Array.isArray(obj);
   var str = isArray ? '[%s],%s' : '{%s},%s';
   map(obj, function(cObj, cKey) {
-    str = isArray ? replace(str, '%s,%s') : replace(str, cKey + ': %s,%s');
+    str = isArray ? replace(str, '%s,%s') : replace(str, cKey + ':%s,%s');
     str = createFuncStr(cObj, keys.concat(cKey), str);
   });
   str = replace(str, '', /(%s|,%s)/g);
@@ -120,10 +120,10 @@ function createFuncStr(obj, keys, parentStr) {
 }
 
 function createFunc(structure) {
-  var base = '{ var newObj = %s; return newObj; }';
-  var str = createFuncStr(structure, ['obj']);
+  var base = '{return %s;}';
+  var str = createFuncStr(structure, ['o']);
   var result = replace(base, str);
-  return new Function('obj', result);
+  return new Function('o', result);
 }
 
 module.exports = new DeepCopy();
