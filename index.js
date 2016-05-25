@@ -56,12 +56,34 @@ function replace(str, value, exp) {
   return str && str.replace(exp || /%s/, value);
 }
 
-function resolveValue(key, value) {
+function resolveKey(keys) {
+  var str = '%s';
+  var key = '%s';
+  var k = keys.shift();
+  var l = keys.length;
+  if (!l) {
+    return replace(str, k);
+  }
+  str = replace(str, '%s && %s');
+  str = replace(str, k);
+  key = replace(key, '%s["%s"]%s');
+  key = replace(key, k);
+  while (l--) {
+    k = keys.shift();
+    key = replace(key, k);
+    str = replace(str, l ? '%s && %s' : '%s');
+    str = replace(str, replace(key, ''));
+    key = replace(key, l ? '["%s"]%s' : '');
+  }
+  return str;
+}
+
+function resolveValue(keys, value) {
   var str = '%k !== undefined ? %k : %s';
-  str = replace(str, key, /%k/g);
+  str = replace(str, resolveKey(keys), /%k/g);
   switch (typeof value) {
     case 'string':
-      return replace(str, '"' + value + '"');
+      return replace(str, replace('"%s"', value));
     case 'object':
       return replace(str, null);
     default:
@@ -79,21 +101,19 @@ function analyze(obj) {
   return map(obj, analyze);
 }
 
-function createFuncStr(obj, key, parentStr) {
+function createFuncStr(obj, keys, parentStr) {
   var type = typeof obj;
   if (type !== 'object') {
     if (!parentStr) {
-      return resolveValue(key, obj);
+      return resolveValue(keys, obj);
     }
-    return replace(parentStr, resolveValue(key, obj));
+    return replace(parentStr, resolveValue(keys, obj));
   }
   var isArray = Array.isArray(obj);
   var str = isArray ? '[%s],%s' : '{%s},%s';
   map(obj, function(cObj, cKey) {
     str = isArray ? replace(str, '%s,%s') : replace(str, cKey + ': %s,%s');
-    // TODO check null
-    var pKey = key + '["' + cKey + '"]';
-    str = createFuncStr(cObj, pKey, str);
+    str = createFuncStr(cObj, keys.concat(cKey), str);
   });
   str = replace(str, '', /(%s|,%s)/g);
   return replace(parentStr, str) || str;
@@ -101,7 +121,7 @@ function createFuncStr(obj, key, parentStr) {
 
 function createFunc(structure) {
   var base = '{ var newObj = %s; return newObj; }';
-  var str = createFuncStr(structure, 'obj');
+  var str = createFuncStr(structure, ['obj']);
   var result = replace(base, str);
   return new Function('obj', result);
 }

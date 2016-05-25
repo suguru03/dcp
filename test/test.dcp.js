@@ -29,7 +29,7 @@ describe('#define', function() {
 describe('#clone', function() {
 
   it('should copy deeply', function() {
-    var struct = {
+    var structure = {
       a: 1,
       b: [1, 2],
       c: { c1: 1, c2: '2'},
@@ -41,7 +41,7 @@ describe('#clone', function() {
       c: { c1: 2, c2: '2'},
       d: { d1: { d11: 'tes', d12: { d123: false } } }
     };
-    var clone = dcp.define('test', struct);
+    var clone = dcp.define('test', structure);
     var newObj = clone(obj);
     assert.deepEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
@@ -92,7 +92,7 @@ describe('#clone', function() {
   });
 
   it('should get default value', function() {
-    var struct = {
+    var structure = {
       a: 1,
       b: 2,
       c: 3
@@ -101,7 +101,7 @@ describe('#clone', function() {
       a: 5,
       c: 5
     };
-    var clone = dcp.define('test', struct);
+    var clone = dcp.define('test', structure);
     var newObj = clone(obj);
     assert.deepEqual(newObj, {
       a: 5,
@@ -109,6 +109,44 @@ describe('#clone', function() {
       c: 5
     });
     assert.notStrictEqual(newObj, obj);
+  });
+
+  it('should make default values', function() {
+    var structure = {
+      a: 1,
+      b: 'default',
+      c: [undefined, { c1: [{}, { c12: false }] }],
+      d: { d1: true }
+    };
+    var obj = {
+      a: 10,
+      c: [1],
+      d: {}
+    };
+    dcp.define('test', structure);
+    var newObj = dcp.clone('test', obj);
+    assert.deepEqual(newObj, {
+      a: 10,
+      b: 'default',
+      c: [1, { c1: [{}, { c12: false }] }],
+      d: { d1: true }
+    });
+    assert.notStrictEqual(structure.d, obj.d);
+    assert.notStrictEqual(structure.d, newObj.d);
+    assert.notStrictEqual(obj.d, newObj.d);
+  });
+
+  it('should make clone', function() {
+    var structure = {
+      a: 1,
+      b: 'default',
+      c: [undefined, { c1: [{}, { c12: false }] }],
+      d: { d1: true }
+    };
+    var clone = dcp.define('test', structure);
+    var newObj = clone();
+    assert.deepEqual(newObj, structure);
+    assert.notStrictEqual(newObj, structure);
   });
 
 });
