@@ -150,3 +150,21 @@ describe('#clone', function() {
   });
 
 });
+
+describe('#shallow', function() {
+
+  it('should copy shallowly', function() {
+    var obj = {
+      a: 1,
+      b: 'default',
+      c: [undefined, { c1: [{}, { c12: false }] }],
+      d: { d1: true }
+    };
+    dcp.define('test', obj);
+    var clone = dcp.shallow('test');
+    var newObj = clone(obj);
+    assert.deepEqual(newObj, obj);
+    assert.notStrictEqual(newObj, obj);
+    assert.strictEqual(newObj.c, obj.c);
+  });
+});

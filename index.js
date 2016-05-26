@@ -20,16 +20,33 @@ DeepCopy.prototype.define = function(key, obj) {
   if (this._defined[key]) {
     throw new Error(key + ' is already defined.');
   }
-  var func = this._defined[key] = createFunc(analyze(obj));
-  return func;
+  var def = this._defined[key] = {
+    deep: createFunc(obj),
+    shallow: createFunc(obj, 1)
+  };
+  return def.deep;
+};
+
+DeepCopy.prototype._get = function(type, key, obj) {
+  if (!this._defined[key]) {
+    this.define(key, obj);
+  }
+  return this._defined[key][type];
+};
+
+
+DeepCopy.prototype.shallow = function(key, obj) {
+  var func = this._get('shallow', key, obj);
+  return arguments.length === 1 ? func : func(obj);
 };
 
 DeepCopy.prototype.clone = function(key, obj) {
-  var func = this._defined[key] || this.define(key, obj);
+  var func = this._get('deep', key, obj);
   return arguments.length === 1 ? func : func(obj);
 };
 
 DeepCopy.prototype.copy = DeepCopy.prototype.clone;
+DeepCopy.prototype.deep = DeepCopy.prototype.clone;
 
 function map(obj, iter) {
   var index = -1;
@@ -69,8 +86,7 @@ function resolveKey(keys) {
   key = replace(key, '%s["%s"]%s');
   key = replace(key, k);
   while (l--) {
-    k = keys.shift();
-    key = replace(key, k);
+    key = replace(key, keys.shift());
     str = replace(str, l ? '%s&&%s' : '%s');
     str = replace(str, replace(key, ''));
     key = replace(key, l ? '["%s"]%s' : '');
@@ -91,37 +107,28 @@ function resolveValue(keys, value) {
   }
 }
 
-function analyze(obj) {
-  if (obj === null) {
-    return null;
-  }
-  if (typeof obj !== 'object') {
-    return obj;
-  }
-  return map(obj, analyze);
-}
-
-function createFuncStr(obj, keys, parentStr) {
+function createFuncStr(obj, keys, parentStr, depth, current) {
   var type = typeof obj;
-  if (type !== 'object') {
+  if (type !== 'object' || current === depth) {
     if (!parentStr) {
       return resolveValue(keys, obj);
     }
     return replace(parentStr, resolveValue(keys, obj));
   }
+  current++;
   var isArray = Array.isArray(obj);
   var str = isArray ? '[%s],%s' : '{%s},%s';
   map(obj, function(cObj, cKey) {
     str = isArray ? replace(str, '%s,%s') : replace(str, cKey + ':%s,%s');
-    str = createFuncStr(cObj, keys.concat(cKey), str);
+    str = createFuncStr(cObj, keys.concat(cKey), str, depth, current);
   });
   str = replace(str, '', /(%s|,%s)/g);
   return replace(parentStr, str) || str;
 }
 
-function createFunc(structure) {
+function createFunc(structure, depth) {
   var base = '{return %s;}';
-  var str = createFuncStr(structure, ['o']);
+  var str = createFuncStr(structure, ['o'], '', depth, 0);
   var result = replace(base, str);
   return new Function('o', result);
 }

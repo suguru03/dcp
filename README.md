@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/dcp.svg)](https://www.npmjs.com/package/dcp)
 
-This module supports to make copy / clone deeply and faster.
+This module supports making copy / clone deeply and faster.
 
 It needs to be defined an object structure and the module will analyse the structure.
 If it isn't defined, it will be defined when it is called first time.
