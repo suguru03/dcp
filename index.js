@@ -91,12 +91,17 @@ function resolveKey(keys) {
     str = replace(str, replace(key, ''));
     key = replace(key, l ? '["%s"]%s' : '');
   }
-  return str;
+  return {
+    str: str,
+    key: key
+  };
 }
 
 function resolveValue(keys, value) {
-  var str = '%k!==undefined?%k:%s';
-  str = replace(str, resolveKey(keys), /%k/g);
+  var str = '%k!==u?%k:%s';
+  var info = resolveKey(keys);
+  str = replace(str, info.str, /%k/);
+  str = replace(str, info.key, /%k/);
   switch (typeof value) {
     case 'string':
       return replace(str, replace('"%s"', value));
@@ -127,7 +132,7 @@ function createFuncStr(obj, keys, parentStr, depth, current) {
 }
 
 function createFunc(structure, depth) {
-  var base = '{return %s;}';
+  var base = '{var u=undefined;return %s;}';
   var str = createFuncStr(structure, ['o'], '', depth, 0);
   var result = replace(base, str);
   return new Function('o', result);
