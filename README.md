@@ -42,9 +42,9 @@ dcp.define('test', structure);
 var newObj = dcp.clone('test', obj);
 /*
  * { a: 10,
- *   b: 'default',
+ *   b: '',
  *   c: [1, 2],
- *   d: { d1: true } }
+ *   d: { d1: false } }
  */
 
 // or
