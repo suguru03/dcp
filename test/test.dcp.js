@@ -52,9 +52,9 @@ describe('#clone', function() {
   it('should copy deep array', function() {
     var obj = [
       1,
-       [
-         [1, '2', true, false, function() {}]
-       ],
+      [
+        [1, '2', true, false, function() {}]
+      ],
       [4, { d: { d1: function() {}}}, [5, { e: [false] } ] ]
     ];
     var clone = dcp.define('test', obj);
@@ -105,7 +105,7 @@ describe('#clone', function() {
     var newObj = clone(obj);
     assert.deepEqual(newObj, {
       a: 5,
-      b: 2,
+      b: 0,
       c: 5
     });
     assert.notStrictEqual(newObj, obj);
@@ -127,9 +127,9 @@ describe('#clone', function() {
     var newObj = dcp.clone('test', obj);
     assert.deepEqual(newObj, {
       a: 10,
-      b: 'default',
+      b: '',
       c: [1, { c1: [{}, { c12: false }] }],
-      d: { d1: true }
+      d: { d1: false }
     });
     assert.notStrictEqual(structure.d, obj.d);
     assert.notStrictEqual(structure.d, newObj.d);
@@ -145,7 +145,12 @@ describe('#clone', function() {
     };
     var clone = dcp.define('test', structure);
     var newObj = clone();
-    assert.deepEqual(newObj, structure);
+    assert.deepEqual(newObj, {
+      a: 0,
+      b: '',
+      c: [undefined, { c1: [{}, { c12: false }] }],
+      d: { d1: false }
+    });
     assert.notStrictEqual(newObj, structure);
   });
 

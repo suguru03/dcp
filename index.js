@@ -16,13 +16,13 @@ DeepCopy.prototype.clean = function(key) {
 /**
  * Define structure automatically
  */
-DeepCopy.prototype.define = function(key, obj) {
+DeepCopy.prototype.define = function(key, structure) {
   if (this._defined[key]) {
     throw new Error(key + ' is already defined.');
   }
   var def = this._defined[key] = {
-    deep: createFunc(obj),
-    shallow: createFunc(obj, 1)
+    deep: createFunc(analyze(structure)),
+    shallow: createFunc(analyze(structure, 1))
   };
   return def.deep;
 };
@@ -69,8 +69,36 @@ function map(obj, iter) {
   return result;
 }
 
+function analyze(structure, depth, current) {
+  if (structure === null) {
+    return 'null';
+  }
+  var type = typeof structure;
+  if (type === 'function') {
+    return structure;
+  }
+  current = current || 0;
+  if (current === depth || type !== 'object') {
+    return type;
+  }
+  current++;
+  return map(structure, function(value) {
+    return analyze(value, depth, current);
+  });
+}
+
 function replace(str, value, exp) {
-  return str && str.replace(exp || /%s/, value);
+  exp = exp || /%s/;
+  if (!str) {
+    return str;
+  }
+  if (!value || typeof value !== 'object') {
+    return str.replace(exp, value);
+  }
+  map(value, function(value) {
+    str = str.replace(exp, value);
+  });
+  return str;
 }
 
 function resolveKey(keys) {
@@ -81,10 +109,8 @@ function resolveKey(keys) {
   if (!l) {
     return replace(str, k);
   }
-  str = replace(str, '%s&&%s');
-  str = replace(str, k);
-  key = replace(key, '%s["%s"]%s');
-  key = replace(key, k);
+  str = replace(str, ['%s&&%s', k]);
+  key = replace(key, ['%s["%s"]%s', k]);
   while (l--) {
     key = replace(key, keys.shift());
     str = replace(str, l ? '%s&&%s' : '%s');
@@ -99,41 +125,44 @@ function resolveKey(keys) {
 
 function resolveValue(keys, value) {
   var str = '%k!==u?%k:%s';
-  var info = resolveKey(keys);
-  str = replace(str, info.str, /%k/);
-  str = replace(str, info.key, /%k/);
-  switch (typeof value) {
+  str = replace(str, resolveKey(keys), /%k/);
+  switch (value) {
     case 'string':
-      return replace(str, replace('"%s"', value));
-    case 'object':
+      return replace(str, replace('"%s"', ''));
+    case 'number':
+      return replace(str, 0);
+    case 'boolean':
+      return replace(str, false);
+    case 'null':
       return replace(str, null);
+    case 'object':
+      return replace(str, '{}');
     default:
       return replace(str, value);
   }
 }
 
-function createFuncStr(obj, keys, parentStr, depth, current) {
+function createFuncStr(obj, keys, parentStr) {
   var type = typeof obj;
-  if (type !== 'object' || current === depth) {
+  if (type !== 'object') {
     if (!parentStr) {
       return resolveValue(keys, obj);
     }
     return replace(parentStr, resolveValue(keys, obj));
   }
-  current++;
   var isArray = Array.isArray(obj);
   var str = isArray ? '[%s],%s' : '{%s},%s';
   map(obj, function(cObj, cKey) {
     str = isArray ? replace(str, '%s,%s') : replace(str, cKey + ':%s,%s');
-    str = createFuncStr(cObj, keys.concat(cKey), str, depth, current);
+    str = createFuncStr(cObj, keys.concat(cKey), str);
   });
   str = replace(str, '', /(%s|,%s)/g);
   return replace(parentStr, str) || str;
 }
 
-function createFunc(structure, depth) {
+function createFunc(structure) {
   var base = '{var u=undefined;return %s;}';
-  var str = createFuncStr(structure, ['o'], '', depth, 0);
+  var str = createFuncStr(structure, ['o'], '');
   var result = replace(base, str);
   return new Function('o', result);
 }
