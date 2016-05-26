@@ -7,6 +7,23 @@ This module supports making copy / clone deeply and faster.
 It needs to be defined an object structure and the module will analyse the structure.
 If it isn't defined, it will be defined when it is called first time.
 
+## Feature
+
+### define(key, structure)
+
+If it is called, functions which have the structure will be made.
+
+### clone(key, [object])
+
+alias: deep, copy
+
+The deep clone will be made by defined structure.
+If the key isn't defined, `define` will be called and then the deep clone function will be called.
+
+### shallow(key, [object])
+
+The shallow clone will be made.
+
 ## Example
 
 ```js
@@ -38,6 +55,9 @@ var newObj = clone(obj);
 dcp.define('test', structure);
 var clone = dcp.clone('test');
 var newObj = clone(obj);
+
+// or
+var newObj = dcp.clone('test', obj);
 ```
 
 ## Benchmark
