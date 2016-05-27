@@ -153,7 +153,7 @@ describe('#clone', function() {
     assert.notStrictEqual(newObj, structure);
   });
 
-  it('should not cause error even if an object has circular structure', function() {
+  it('should not cause an error even if an object has circular structure', function() {
     var obj = {
       a: 1
     };
@@ -167,6 +167,29 @@ describe('#clone', function() {
     assert.deepEqual(newObj, obj);
     assert.notStrictEqual(newObj.b, obj.b);
     assert.notStrictEqual(newObj.b.b, obj.b.b);
+  });
+
+  it('should copy multi circular structure', function() {
+    var obj1 = {
+      a: 1
+    };
+    var obj2 = {
+      a: 2,
+      b: obj1
+    };
+    var obj3 = {
+      a: 3,
+      b: obj2
+    };
+    obj1.b = obj2;
+    obj1.c = obj3;
+    obj2.c = obj3;
+    obj3.c = obj1;
+    var clone = dcp.define('test', obj1);
+    var newObj = clone(obj1);
+    assert.deepEqual(newObj, obj1);
+    assert.notStrictEqual(newObj.b, obj1.b);
+    assert.notStrictEqual(newObj.b.b, obj1.b.b);
   });
 
 });

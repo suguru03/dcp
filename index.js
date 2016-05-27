@@ -160,7 +160,7 @@ function createFuncStr(obj, keys, parentStr) {
 }
 
 function resolveCircular(str) {
-  var exp = /%r<(.*)?>/;
+  var exp = /%r<(.*?)>/;
   var bar = str.match(exp);
   if (!bar) {
     return str;
@@ -174,7 +174,7 @@ function resolveCircular(str) {
   s = replace(s, val, /%v/);
   str = replace(str, '%s%s');
   str = replace(str, s);
-  return str;
+  return resolveCircular(str);
 }
 
 function createFunc(structure) {
