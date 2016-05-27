@@ -1,5 +1,4 @@
 /* global beforeEach, describe, it */
-
 'use strict';
 
 var assert = require('assert');
@@ -152,6 +151,22 @@ describe('#clone', function() {
       d: { d1: false }
     });
     assert.notStrictEqual(newObj, structure);
+  });
+
+  it('should not cause error even if an object has circular structure', function() {
+    var obj = {
+      a: 1
+    };
+    var obj2 = {
+      a: 2,
+      b: obj
+    };
+    obj.b = obj2;
+    var clone = dcp.define('test', obj);
+    var newObj = clone(obj);
+    assert.deepEqual(newObj, obj);
+    assert.notStrictEqual(newObj.b, obj.b);
+    assert.notStrictEqual(newObj.b.b, obj.b.b);
   });
 
 });

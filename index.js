@@ -20,9 +20,10 @@ DeepCopy.prototype.define = function(key, structure) {
   if (this._defined[key]) {
     throw new Error(key + ' is already defined.');
   }
+  var analyze = new Analyze(structure);
   var def = this._defined[key] = {
-    deep: createFunc(analyze(structure)),
-    shallow: createFunc(analyze(structure, 1))
+    deep: createFunc(analyze.deep()),
+    shallow: createFunc(analyze.shallow())
   };
   return def.deep;
 };
@@ -48,6 +49,12 @@ DeepCopy.prototype.clone = function(key, obj) {
 DeepCopy.prototype.copy = DeepCopy.prototype.clone;
 DeepCopy.prototype.deep = DeepCopy.prototype.clone;
 
+function clone(obj) {
+  return map(obj, function(value) {
+    return value;
+  });
+}
+
 function map(obj, iter) {
   var index = -1;
   var key, keys, size, result;
@@ -67,24 +74,6 @@ function map(obj, iter) {
     }
   }
   return result;
-}
-
-function analyze(structure, depth, current) {
-  if (structure === null) {
-    return 'null';
-  }
-  var type = typeof structure;
-  if (type === 'function') {
-    return structure;
-  }
-  current = current || 0;
-  if (current === depth || type !== 'object') {
-    return type;
-  }
-  current++;
-  return map(structure, function(value) {
-    return analyze(value, depth, current);
-  });
 }
 
 function replace(str, value, exp) {
@@ -107,7 +96,10 @@ function resolveKey(keys) {
   var k = keys.shift();
   var l = keys.length;
   if (!l) {
-    return replace(str, k);
+    return {
+      str: replace(str, k),
+      key: k
+    };
   }
   str = replace(str, ['%s&&%s', k]);
   key = replace(key, ['%s["%s"]%s', k]);
@@ -125,12 +117,15 @@ function resolveKey(keys) {
 
 function resolveValue(keys, value) {
   var str = '%k!==u?%k:%s';
-  str = replace(str, resolveKey(keys), /%k/);
+  var info = resolveKey(keys);
+  str = replace(str, info, /%k/);
   switch (value) {
     case 'string':
       return replace(str, replace('"%s"', ''));
     case 'number':
       return replace(str, 0);
+    case 'undefined':
+      return replace(str, undefined);
     case 'boolean':
       return replace(str, false);
     case 'null':
@@ -138,7 +133,11 @@ function resolveValue(keys, value) {
     case 'object':
       return replace(str, '{}');
     default:
-      return replace(str, value);
+      if (typeof value === 'function') {
+        return replace(str, value.toString());
+      }
+      // circular structure
+      return replace(replace('%r<%k|%s>', value), info.key, /%k/);
   }
 }
 
@@ -160,11 +159,75 @@ function createFuncStr(obj, keys, parentStr) {
   return replace(parentStr, str) || str;
 }
 
-function createFunc(structure) {
-  var base = '{var u=undefined;return %s;}';
-  var str = createFuncStr(structure, ['o'], '');
-  var result = replace(base, str);
-  return new Function('o', result);
+function resolveCircular(str) {
+  var exp = /%r<(.*)?>/;
+  var bar = str.match(exp);
+  if (!bar) {
+    return str;
+  }
+  str = replace(str, 'u', exp);
+  var param = bar[1].split(/\|/);
+  var key = replace(param[0], 'c', /o/);
+  var val = param[1];
+  var s = '%k=%v;';
+  s = replace(s, key, /%k/);
+  s = replace(s, val, /%v/);
+  str = replace(str, '%s%s');
+  str = replace(str, s);
+  return str;
 }
+
+function createFunc(structure) {
+  var base = '{var u=undefined,c=%s;%sreturn c;}';
+  var str = createFuncStr(structure, ['o'], '');
+  str = replace(base, str);
+  str = resolveCircular(str);
+  str = replace(str, '');
+  return new Function('o', str);
+}
+
+function Analyze(structure) {
+  this._structure = structure;
+  this._object = [];
+  this._keys = [];
+}
+
+Analyze.prototype._analyze = function(structure, keys, depth, current) {
+  if (structure === null) {
+    return 'null';
+  }
+  var type = typeof structure;
+  if (type === 'function') {
+    return structure;
+  }
+  var index = this._object.indexOf(structure);
+  if (index >= 0) {
+    return resolveKey(clone(this._keys[index])).key;
+  }
+  current = current || 0;
+  if (current === depth || type !== 'object') {
+    return type;
+  }
+  current++;
+  var self = this;
+  self._object.push(structure);
+  self._keys.push(keys);
+  structure = map(structure, function(value, key) {
+    return self._analyze(value, keys.concat(key), depth, current);
+  });
+  if (current === 1) {
+    this._object = [];
+    this._keys = [];
+  }
+  return structure;
+};
+
+Analyze.prototype.deep = function() {
+  return this._analyze(this._structure, ['c']);
+};
+
+Analyze.prototype.shallow = function() {
+  return this._analyze(this._structure, ['c'], 1);
+};
 
 module.exports = new DeepCopy();
