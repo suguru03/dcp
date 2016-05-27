@@ -49,6 +49,50 @@ DeepCopy.prototype.clone = function(key, obj) {
 DeepCopy.prototype.copy = DeepCopy.prototype.clone;
 DeepCopy.prototype.deep = DeepCopy.prototype.clone;
 
+function Analyze(structure) {
+  this._structure = structure;
+  this._object = [];
+  this._keys = [];
+}
+
+Analyze.prototype._analyze = function(structure, keys, depth, current) {
+  if (structure === null) {
+    return 'null';
+  }
+  var type = typeof structure;
+  if (type === 'function') {
+    return structure;
+  }
+  var index = this._object.indexOf(structure);
+  if (index >= 0) {
+    return resolveKey(clone(this._keys[index])).key;
+  }
+  current = current || 0;
+  if (current === depth || type !== 'object') {
+    return type;
+  }
+  current++;
+  var self = this;
+  self._object.push(structure);
+  self._keys.push(keys);
+  structure = map(structure, function(value, key) {
+    return self._analyze(value, keys.concat(key), depth, current);
+  });
+  if (current === 1) {
+    this._object = [];
+    this._keys = [];
+  }
+  return structure;
+};
+
+Analyze.prototype.deep = function() {
+  return this._analyze(this._structure, ['c']);
+};
+
+Analyze.prototype.shallow = function() {
+  return this._analyze(this._structure, ['c'], 1);
+};
+
 function clone(obj) {
   return map(obj, function(value) {
     return value;
@@ -116,9 +160,9 @@ function resolveKey(keys) {
 }
 
 function resolveValue(keys, value) {
-  var str = '%k!==u?%k:%s';
+  var str = '%s!==u?%s:%s';
   var info = resolveKey(keys);
-  str = replace(str, info, /%k/);
+  str = replace(str, info);
   switch (value) {
     case 'string':
       return replace(str, replace('"%s"', ''));
@@ -137,30 +181,30 @@ function resolveValue(keys, value) {
         return replace(str, value.toString());
       }
       // circular structure
-      return replace(replace('%r<%k|%s>', value), info.key, /%k/);
+      return replace(replace('%c<%s|%s>', info.key), value);
   }
 }
 
-function createFuncStr(obj, keys, parentStr) {
+function createFuncStr(obj, keys, str) {
   var type = typeof obj;
   if (type !== 'object') {
-    if (!parentStr) {
+    if (!str) {
       return resolveValue(keys, obj);
     }
-    return replace(parentStr, resolveValue(keys, obj));
+    return replace(str, resolveValue(keys, obj));
   }
   var isArray = Array.isArray(obj);
-  var str = isArray ? '[%s],%s' : '{%s},%s';
-  map(obj, function(cObj, cKey) {
-    str = isArray ? replace(str, '%s,%s') : replace(str, cKey + ':%s,%s');
-    str = createFuncStr(cObj, keys.concat(cKey), str);
+  var s = isArray ? '[%s],%s' : '{%s},%s';
+  map(obj, function(o, k) {
+    s = isArray ? replace(s, '%s,%s') : replace(s, k + ':%s,%s');
+    s = createFuncStr(o, keys.concat(k), s);
   });
-  str = replace(str, '', /(%s|,%s)/g);
-  return replace(parentStr, str) || str;
+  s = replace(s, '', /(%s|,%s)/g);
+  return replace(str, s) || s;
 }
 
 function resolveCircular(str) {
-  var exp = /%r<(.*?)>/;
+  var exp = /%c<(.*?)>/;
   var bar = str.match(exp);
   if (!bar) {
     return str;
@@ -169,65 +213,19 @@ function resolveCircular(str) {
   var param = bar[1].split(/\|/);
   var key = replace(param[0], 'c', /o/);
   var val = param[1];
-  var s = '%k=%v;';
-  s = replace(s, key, /%k/);
-  s = replace(s, val, /%v/);
-  str = replace(str, '%s%s');
-  str = replace(str, s);
+  var s = '%s=%s;';
+  s = replace(s, [key, val]);
+  str = replace(str, ['%s%s', s]);
   return resolveCircular(str);
 }
 
 function createFunc(structure) {
-  var base = '{var u=undefined,c=%s;%sreturn c;}';
+  var base = '{var u,c=%s;%sreturn c;}';
   var str = createFuncStr(structure, ['o'], '');
   str = replace(base, str);
   str = resolveCircular(str);
   str = replace(str, '');
   return new Function('o', str);
 }
-
-function Analyze(structure) {
-  this._structure = structure;
-  this._object = [];
-  this._keys = [];
-}
-
-Analyze.prototype._analyze = function(structure, keys, depth, current) {
-  if (structure === null) {
-    return 'null';
-  }
-  var type = typeof structure;
-  if (type === 'function') {
-    return structure;
-  }
-  var index = this._object.indexOf(structure);
-  if (index >= 0) {
-    return resolveKey(clone(this._keys[index])).key;
-  }
-  current = current || 0;
-  if (current === depth || type !== 'object') {
-    return type;
-  }
-  current++;
-  var self = this;
-  self._object.push(structure);
-  self._keys.push(keys);
-  structure = map(structure, function(value, key) {
-    return self._analyze(value, keys.concat(key), depth, current);
-  });
-  if (current === 1) {
-    this._object = [];
-    this._keys = [];
-  }
-  return structure;
-};
-
-Analyze.prototype.deep = function() {
-  return this._analyze(this._structure, ['c']);
-};
-
-Analyze.prototype.shallow = function() {
-  return this._analyze(this._structure, ['c'], 1);
-};
 
 module.exports = new DeepCopy();
