@@ -27,6 +27,12 @@ describe('#define', function() {
 
 describe('#clone', function() {
 
+  it('should return string', function() {
+    var str = 'test';
+    var newStr = dcp.clone('test', str);
+    assert.strictEqual(str, newStr);
+  });
+
   it('should copy deeply', function() {
     var structure = {
       a: 1,
@@ -190,6 +196,27 @@ describe('#clone', function() {
     assert.deepEqual(newObj, obj1);
     assert.notStrictEqual(newObj.b, obj1.b);
     assert.notStrictEqual(newObj.b.b, obj1.b.b);
+  });
+
+  it('should copy class', function() {
+    var Test = function(str) {
+      this._str = str;
+    };
+    Test.prototype.get = function() {
+      return this._str;
+    };
+    Test.prototype.set = function(str) {
+      this._str = str;
+      return this;
+    };
+    var test = new Test('test');
+    var newObj = dcp.clone('test', test);
+    assert.deepEqual(newObj, test);
+    assert.strictEqual(newObj.__proto__, test.__proto__);
+    assert.notStrictEqual(newObj, test);
+    assert.notStrictEqual(newObj, test);
+    assert.strictEqual(newObj.get(), test.get());
+    assert.strictEqual(newObj.set('test2').get(), test.set('test2').get());
   });
 
 });

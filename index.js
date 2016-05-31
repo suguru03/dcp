@@ -203,6 +203,16 @@ function createFuncStr(obj, keys, str) {
   return replace(str, s) || s;
 }
 
+// TODO resolve deep prototype
+function resolveProto(str, structure) {
+  if (typeof structure === 'object') {
+    str = replace(str, ['p="__proto__",', "c[p]=o&&o[p];"], /%p/);
+  } else {
+    str = replace(str, '', /%p/g);
+  }
+  return str;
+}
+
 function resolveCircular(str) {
   var exp = /%c<(.*?)>/;
   var bar = str.match(exp);
@@ -220,9 +230,10 @@ function resolveCircular(str) {
 }
 
 function createFunc(structure) {
-  var base = '{var u,c=%s;%sreturn c;}';
+  var base = '{var u,%pc=%s;%p%sreturn c;}';
   var str = createFuncStr(structure, ['o'], '');
   str = replace(base, str);
+  str = resolveProto(str, structure);
   str = resolveCircular(str);
   str = replace(str, '');
   return new Function('o', str);
