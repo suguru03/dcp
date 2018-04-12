@@ -198,7 +198,7 @@
     var isArray = Array.isArray(obj);
     var s = isArray ? '[%s],%s' : '{%s},%s';
     map(obj, function(o, k) {
-      s = isArray ? replace(s, '%s,%s') : replace(s, k + ':%s,%s');
+      s = isArray ? replace(s, '%s,%s') : replace(s, "\'" + k + "\'" + ':%s,%s');
       s = createFuncStr(o, keys.concat(k), s);
     });
     s = replace(s, '', /(%s|,%s)/g);
