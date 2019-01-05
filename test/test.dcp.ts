@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import * as _ from 'lodash';
 
-import dcp from '../';
+import dcp from '..';
 
 beforeEach(() => dcp.clean());
 
