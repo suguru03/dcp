@@ -1,12 +1,13 @@
 import * as assert from 'assert';
 
 import * as _ from 'lodash';
+
 import dcp from '../';
 
 beforeEach(() => dcp.clean());
 
-describe('#define', function() {
-  it('should define new clone function', function() {
+describe('#define', () => {
+  it('should define new clone function', () => {
     const obj = {
       a: 1,
     };
@@ -18,14 +19,14 @@ describe('#define', function() {
   });
 });
 
-describe('#clone', function() {
-  it('should return string', function() {
+describe('#clone', () => {
+  it('should return string', () => {
     const str = 'test';
     const newStr = dcp.clone('test', str);
     assert.strictEqual(str, newStr);
   });
 
-  it('should copy deeply', function() {
+  it('should copy deeply', () => {
     const structure = {
       a: 1,
       b: [1, 2],
@@ -46,11 +47,11 @@ describe('#clone', function() {
     assert.notDeepEqual(newObj, obj);
   });
 
-  it('should copy deep array', function() {
+  it('should copy deep array', () => {
     const obj = [
       1,
-      [[1, '2', true, false, function() {}]],
-      [4, { d: { d1: function() {} } }, [5, { e: [false] }]],
+      [[1, '2', true, false, () => {}]],
+      [4, { d: { d1: () => {} } }, [5, { e: [false] }]],
     ];
     const clone = dcp.define('test', obj);
     const newObj = clone(obj);
@@ -58,20 +59,18 @@ describe('#clone', function() {
     assert.notStrictEqual(newObj, obj);
   });
 
-  it('should copy deep object', function() {
+  it('should copy deep object', () => {
     const count = 10;
-    const obj = _.mapValues(_.times(count), function(num) {
-      return _.mapValues(_.times(num), function(num) {
-        return _.mapValues(_.times(num));
-      });
-    });
+    const obj = _.mapValues(_.times(count), num =>
+      _.mapValues(_.times(num), num => _.mapValues(_.times(num))),
+    );
     const clone = dcp.define('test', obj);
     const newObj = clone(obj);
     assert.deepEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
   });
 
-  it('should get clone function', function() {
+  it('should get clone function', () => {
     const obj = {
       a: {},
       b: [],
@@ -86,7 +85,7 @@ describe('#clone', function() {
     assert.notStrictEqual(newObj, obj);
   });
 
-  it('should get default value', function() {
+  it('should get default value', () => {
     const structure = {
       a: 1,
       b: 2,
@@ -106,7 +105,7 @@ describe('#clone', function() {
     assert.notStrictEqual(newObj, obj);
   });
 
-  it('should make default values', function() {
+  it('should make default values', () => {
     const structure = {
       a: 1,
       b: 'default',
@@ -131,7 +130,7 @@ describe('#clone', function() {
     assert.notStrictEqual(obj.d, newObj.d);
   });
 
-  it('should make clone', function() {
+  it('should make clone', () => {
     const structure = {
       a: 1,
       b: 'default',
@@ -149,7 +148,7 @@ describe('#clone', function() {
     assert.notStrictEqual(newObj, structure);
   });
 
-  it('should not cause an error even if an object has circular structure', function() {
+  it('should not cause an error even if an object has circular structure', () => {
     const obj: any = {
       a: 1,
     };
@@ -165,7 +164,7 @@ describe('#clone', function() {
     assert.notStrictEqual(newObj.b.b, obj.b.b);
   });
 
-  it('should copy multi circular structure', function() {
+  it('should copy multi circular structure', () => {
     const obj1: any = {
       a: 1,
     };
@@ -188,7 +187,7 @@ describe('#clone', function() {
     assert.notStrictEqual(newObj.b.b, obj1.b.b);
   });
 
-  it('should copy class', function() {
+  it('should copy class', () => {
     const Test = function(str) {
       this._str = str;
     };
@@ -210,8 +209,8 @@ describe('#clone', function() {
   });
 });
 
-describe('#shallow', function() {
-  it('should copy shallowly', function() {
+describe('#shallow', () => {
+  it('should copy shallowly', () => {
     const obj = {
       a: 1,
       b: 'default',
