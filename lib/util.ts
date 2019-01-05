@@ -126,12 +126,12 @@ function resolveCircular(str) {
   return resolveCircular(str);
 }
 
-export function createFunc(structure) {
+export function createFunc<T>(structure) {
   var base = '{var u,%pc=%s;%p%sreturn c;}';
   var str = createFuncStr(structure, ['o'], '');
   str = replace(base, str);
   str = resolveProto(str, structure);
   str = resolveCircular(str);
   str = replace(str, '');
-  return new Function('o', str);
+  return new Function('o', str) as any;
 }

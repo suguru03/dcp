@@ -1,45 +1,56 @@
 import { Parser } from './Parser';
 import { createFunc } from './util';
 
-export class DeepCopy {
-  private definitionMap: Map<any, any> = new Map();
+type DeepPartial<T> = { [P in keyof T]?: DeepPartial<T[P]> };
+type Cloner<T> = (obj?: DeepPartial<T>) => T;
 
-  clean(key?: any) {
+type StrongType = string | number | boolean | undefined | null;
+type WeakType = object;
+type ClonerMap = Map<StrongType, Cloner<any>>;
+type WeakClonerMap = WeakMap<WeakType, Cloner<any>>;
+
+interface MapInterface {
+  get: <T = any>(key: any) => Cloner<T>;
+  set: (key: any, cloner: Cloner<any>) => this;
+  has: (key: any) => boolean;
+  delete: (key: any) => boolean;
+}
+
+export class DeepCopy {
+  private clonerMap: ClonerMap = new Map();
+  private weakClonerMap: WeakClonerMap = new WeakMap();
+
+  clean(key?: any): this {
     if (key) {
-      this.definitionMap.delete(key);
+      const map = this.getClonerMap(key);
+      map.delete(key);
     } else {
-      this.definitionMap = new Map();
+      this.clonerMap = new Map();
+      this.weakClonerMap = new WeakMap();
     }
     return this;
   }
 
-  define(key: any, structure: any) {
-    if (this.definitionMap.has(key)) {
+  define<T>(key: any, structure: T): Cloner<T> {
+    const map = this.getClonerMap(key);
+    if (map.has(key)) {
       throw new Error(`${key} is already defined.`);
     }
-    const analyze = new Parser(structure);
-    const def = {
-      deep: createFunc(analyze.deep()),
-      shallow: createFunc(analyze.shallow()),
-    };
-    this.definitionMap.set(key, def);
-    return def.deep;
+    const parser = new Parser(structure);
+    const cloner = createFunc(parser.deep());
+    map.set(key, cloner);
+    return cloner;
   }
 
-  shallow(key, obj?) {
-    const func = this.get('shallow', key, obj);
-    return arguments.length === 1 ? func : func(obj);
-  }
-
-  clone(key, obj?) {
-    const func = this.get('deep', key, obj);
-    return arguments.length === 1 ? func : func(obj);
-  }
-
-  private get(type, key, object) {
-    if (!this.definitionMap.has(key)) {
-      this.define(key, object);
+  clone<T>(key: any, obj: DeepPartial<T>): T {
+    const map = this.getClonerMap(key);
+    if (!map.has(key)) {
+      this.define(key, obj);
     }
-    return this.definitionMap.get(key)[type];
+    return map.get(key)(obj);
+  }
+
+  private getClonerMap(key: any): MapInterface {
+    return key && typeof key === 'object' ? this.weakClonerMap : this.clonerMap;
   }
 }

@@ -77,8 +77,7 @@ describe('#clone', () => {
       c: [{}, { c1: { c2: {} } }],
       d: false,
     };
-    dcp.define('test', obj);
-    const func = dcp.clone('test');
+    const func = dcp.define('test', obj);
     assert.strictEqual(typeof func, 'function');
     const newObj = func(obj);
     assert.deepEqual(newObj, obj);
@@ -199,29 +198,12 @@ describe('#clone', () => {
       return this;
     };
     const test = new Test('test');
-    const newObj = dcp.clone('test', test);
+    const newObj = dcp.clone<any>('test', test);
     assert.deepEqual(newObj, test);
     assert.strictEqual(newObj.__proto__, test.__proto__);
     assert.notStrictEqual(newObj, test);
     assert.notStrictEqual(newObj, test);
     assert.strictEqual(newObj.get(), test.get());
     assert.strictEqual(newObj.set('test2').get(), test.set('test2').get());
-  });
-});
-
-describe('#shallow', () => {
-  it('should copy shallowly', () => {
-    const obj = {
-      a: 1,
-      b: 'default',
-      c: [undefined, { c1: [{}, { c12: false }] }],
-      d: { d1: true },
-    };
-    dcp.define('test', obj);
-    const clone = dcp.shallow('test');
-    const newObj = clone(obj);
-    assert.deepEqual(newObj, obj);
-    assert.notStrictEqual(newObj, obj);
-    assert.strictEqual(newObj.c, obj.c);
   });
 });
