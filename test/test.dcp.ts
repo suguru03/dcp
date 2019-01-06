@@ -198,12 +198,23 @@ describe('#clone', () => {
       return this;
     };
     const test = new Test('test');
-    const newObj = dcp.clone<any>('test', test);
+    const newObj = dcp.clone('test', test);
     assert.deepEqual(newObj, test);
     assert.strictEqual(newObj.__proto__, test.__proto__);
     assert.notStrictEqual(newObj, test);
     assert.notStrictEqual(newObj, test);
     assert.strictEqual(newObj.get(), test.get());
     assert.strictEqual(newObj.set('test2').get(), test.set('test2').get());
+  });
+
+  it('should copy using reference type', () => {
+    const a = { b: 1 };
+    const obj = { a };
+    const obj1 = dcp.clone(obj);
+    const obj2 = dcp.clone(obj);
+    assert.notStrictEqual(obj1, obj);
+    assert.notStrictEqual(obj1.a, obj);
+    assert.deepStrictEqual(obj1, obj);
+    assert.deepStrictEqual(obj2, obj);
   });
 });

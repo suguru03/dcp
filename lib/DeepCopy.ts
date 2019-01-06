@@ -42,7 +42,12 @@ export class DeepCopy {
     return cloner;
   }
 
-  clone<T>(key: any, obj: DeepPartial<T>): T {
+  clone<K>(key: K): K;
+  clone<K, T>(key: K, obj: T): T;
+  clone<K, T>(key: K, obj?: T): T {
+    if (arguments.length === 1) {
+      obj = key as any;
+    }
     const map = this.getClonerMap(key);
     if (!map.has(key)) {
       this.define(key, obj);
