@@ -1,45 +1,39 @@
-# Deep CoPy
+# dcp
 
 [![npm](https://img.shields.io/npm/v/dcp.svg)](https://www.npmjs.com/package/dcp)
 
 This module supports making copy / clone deeply and faster.
 
-It needs to be defined an object structure and the module will analyse the structure.
-If it isn't defined, it will be defined when it is called first time.
+## Usage
 
-## Feature
+### Runtime parsing
 
-### define(key, structure)
-
-If it is called, functions which have the structure will be made.
-
-### clone(key, [object])
-
-alias: deep, copy
-
-The deep clone will be made by defined structure.
-If the key isn't defined, `define` will be called and then the deep clone function will be called.
-
-### shallow(key, [object])
-
-The shallow clone will be made.
-
-## Example
+If the base object refernce is NOT changed, you can use it without defining a key.
 
 ```js
-var structure = {
-  a: 1,
-  b: 'default',
-  c: [undefined, undefined],
-  d: { d1: true }
-};
-var obj = {
+const obj = {
   a: 10,
   c: [1, 2],
   d: {}
 };
-dcp.define('test', structure);
-var newObj = dcp.clone('test', obj);
+
+// only first time, it will be parsed
+const newObj = dcp.clone(obj);
+/*
+ * { a: 10,
+ *   b: '',
+ *   c: [1, 2],
+ *   d: { d1: false } }
+ */
+```
+
+### Runtime parsing with a key
+
+If the object reference is changed but the format is the same, you need to use it with a key.
+
+```js
+// only first time, it will be parsed
+const newObj = dcp.clone('key1', obj);
 /*
  * { a: 10,
  *   b: '',
@@ -47,17 +41,30 @@ var newObj = dcp.clone('test', obj);
  *   d: { d1: false } }
  */
 
-// or
-var clone = dcp.clone('test', structure);
-var newObj = clone(obj);
+// get the default values
+const newObj2 = dcp.clone('key1');
+/*
+ * { a: 0,
+ *   b: '',
+ *   c: [0, 0],
+ *   d: { d1: false } }
+ */
+```
 
-// or
-dcp.define('test', structure);
-var clone = dcp.clone('test');
-var newObj = clone(obj);
+### Pre-defined
 
-// or
-var newObj = dcp.clone('test', obj);
+It is the fastest way, but the difference is only the first clone.
+
+```js
+const structure = {
+  a: 1,
+  b: 'default',
+  c: [undefined, undefined],
+  d: { d1: true }
+};
+const key = 'test';
+dcp.define(key, structure);
+const newObj = dcp.clone(key, obj);
 ```
 
 ## Benchmark
@@ -96,3 +103,21 @@ var obj = _.mapValues(_.times(10), function(num) {
  * [3] "cloneDeep" 1.1ms [7.55]
  */
 ```
+
+## APIs
+
+### define
+
+arguments: (key: any, structure: any)
+arguments: (structure: any)
+
+If it is called, functions which have the structure will be made.
+
+### clone
+
+arguments: (key: any, structure: any)
+arguments: (structure: any)
+
+The deep clone will be made by defined structure.
+If the key isn't defined, `define` will be called and then the deep clone function will be called.
+
