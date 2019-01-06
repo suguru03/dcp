@@ -31,7 +31,12 @@ export class DeepCopy {
     return this;
   }
 
-  define<T>(key: any, structure: T): Cloner<T> {
+  define<T>(structure: T): Cloner<T>;
+  define<T>(key: any, structure: T): Cloner<T>;
+  define<T>(key: any, structure?: T): Cloner<T> {
+    if (arguments.length === 1) {
+      structure = key;
+    }
     const map = this.getClonerMap(key);
     if (map.has(key)) {
       throw new Error(`${key} is already defined.`);
@@ -42,11 +47,11 @@ export class DeepCopy {
     return cloner;
   }
 
-  clone<K>(key: K): K;
-  clone<K, T>(key: K, obj: T): T;
-  clone<K, T>(key: K, obj?: T): T {
+  clone<T>(obj: T): T;
+  clone<T>(key: any, obj: T): T;
+  clone<T>(key: any, obj?: T): T {
     if (arguments.length === 1) {
-      obj = key as any;
+      obj = key;
     }
     const map = this.getClonerMap(key);
     if (!map.has(key)) {
