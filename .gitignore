@@ -4,3 +4,24 @@ npm-debug.log
 
 # yarn
 yarn-error.log
+
+# build
+build/
+
+# nyc
+coverage
+.nyc_output
+
+# docusaurus
+.DS_Store
+
+node_modules
+
+lib/core/metadata.js
+lib/core/MetadataBlog.js
+
+website/translated_docs
+website/build/
+website/yarn.lock
+website/node_modules
+website/i18n/*
