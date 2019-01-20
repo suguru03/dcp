@@ -1,8 +1,6 @@
-export function clone(obj) {
-  return map(obj, value => value);
-}
+export const clone = obj => map(obj, value => value);
 
-export function map(obj, iter) {
+export const map = (obj, iter) => {
   if (Array.isArray(obj)) {
     return obj.map((value, index) => iter(value, index));
   }
@@ -16,9 +14,9 @@ export function map(obj, iter) {
     result[key] = iter(obj[key], key);
   }
   return result;
-}
+};
 
-function replace(str, value, exp = /%s/) {
+const replace = (str, value, exp = /%s/) => {
   if (!str) {
     return str;
   }
@@ -29,9 +27,9 @@ function replace(str, value, exp = /%s/) {
     str = str.replace(exp, value);
   });
   return str;
-}
+};
 
-export function resolveKey(keys) {
+export const resolveKey = keys => {
   var str = '%s';
   var key = '%s';
   var k = keys.shift();
@@ -54,9 +52,9 @@ export function resolveKey(keys) {
     str: str,
     key: key,
   };
-}
+};
 
-function resolveValue(keys, value) {
+const resolveValue = (keys, value) => {
   var str = '%s!==u?%s:%s';
   var info = resolveKey(keys);
   str = replace(str, info);
@@ -80,9 +78,9 @@ function resolveValue(keys, value) {
       // circular structure
       return replace(replace('%c<%s|%s>', info.key), value);
   }
-}
+};
 
-function createFuncStr(obj, keys, str) {
+const createFuncStr = (obj, keys, str) => {
   var type = typeof obj;
   if (type !== 'object') {
     if (!str) {
@@ -98,19 +96,19 @@ function createFuncStr(obj, keys, str) {
   });
   s = replace(s, '', /(%s|,%s)/g);
   return replace(str, s) || s;
-}
+};
 
 // TODO resolve deep prototype
-function resolveProto(str, structure) {
+const resolveProto = (str, structure) => {
   if (typeof structure === 'object') {
     str = replace(str, ['p="__proto__",', 'c[p]=o&&o[p];'], /%p/);
   } else {
     str = replace(str, '', /%p/g);
   }
   return str;
-}
+};
 
-function resolveCircular(str) {
+const resolveCircular = str => {
   var exp = /%c<(.*?)>/;
   var bar = str.match(exp);
   if (!bar) {
@@ -124,9 +122,9 @@ function resolveCircular(str) {
   s = replace(s, [key, val]);
   str = replace(str, ['%s%s', s]);
   return resolveCircular(str);
-}
+};
 
-export function createFunc<T>(structure) {
+export const createFunc = <T>(structure) => {
   var base = '{var u,%pc=%s;%p%sreturn c;}';
   var str = createFuncStr(structure, ['o'], '');
   str = replace(base, str);
@@ -134,4 +132,4 @@ export function createFunc<T>(structure) {
   str = resolveCircular(str);
   str = replace(str, '');
   return new Function('o', str) as any;
-}
+};
