@@ -26,7 +26,7 @@ describe('#clone', () => {
     assert.strictEqual(str, newStr);
   });
 
-  it.only('should copy deeply', () => {
+  it('should copy deeply', () => {
     const structure = {
       a: 1,
       b: [1, 2],
