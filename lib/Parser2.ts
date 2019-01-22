@@ -2,8 +2,12 @@ type DeepPartial<T> = { [P in keyof T]?: DeepPartial<T[P]> };
 type Key = string | number;
 export type Cloner<T> = (obj?: DeepPartial<T>) => T;
 
+const protoKey = '__proto__';
+
 export class Parser2<T> {
   private readonly objects: Map<any, Key[]> = new Map();
+  private extra: string = '';
+  private hasProto: boolean = false;
   private hasRecursion: boolean = false;
   private cloner: Cloner<T>;
   constructor(obj: T) {
@@ -17,15 +21,13 @@ export class Parser2<T> {
 
   private createCloner<T>(obj: T) {
     const arg = 'o';
-    let str = `{let u, r=${this.parse(obj, [arg], 0)}; return r};`;
-    if (this.hasRecursion) {
+    let str = `{let u, r=${this.parse(obj, [arg], 0)};`;
+    if (this.hasRecursion || this.hasProto) {
       this.objects.clear();
       str = this.resolveRecursion(str, obj, ['r'], 0);
     }
+    str += ' return r};';
     this.cloner = new Function(arg, str) as any;
-    console.log('base:', require('util').inspect(obj, false, null));
-    console.log('clone:', require('util').inspect(this.cloner(obj), false, null));
-    console.log('init:', require('util').inspect(this.cloner(), false, null));
   }
 
   private parse<T>(obj: T, keys: Key[], depth: number) {
@@ -62,7 +64,7 @@ export class Parser2<T> {
         init = obj.toString();
         break;
     }
-    const [key, path] = this.resolveKey(keys, depth);
+    const [key, path] = this.getKeyAndPath(keys, depth);
     return `${key}!==u?${path}:${init}`;
   }
 
@@ -83,6 +85,7 @@ export class Parser2<T> {
       }
     }
     str += '}';
+    this.hasProto = this.hasProto || !!obj[protoKey];
     return str;
   }
 
@@ -103,7 +106,7 @@ export class Parser2<T> {
   }
 
   // TODO: cache
-  private resolveKey(keys: Key[], depth: number) {
+  private getKeyAndPath(keys: Key[], depth: number) {
     let [key] = keys;
     let path = key;
     let i = 0;
@@ -114,6 +117,7 @@ export class Parser2<T> {
     return [key, path];
   }
 
+  // recursion and proto
   private resolveRecursion<T>(str: string, obj: T, keys: Key[], depth: number) {
     if (!obj || typeof obj !== 'object') {
       return str;
@@ -121,19 +125,28 @@ export class Parser2<T> {
     depth++;
     if (this.objects.has(obj)) {
       // debug
-      // str = str.replace(/return/, `\nreturn`);
+      str += '\n';
       const referenceKeys = this.objects.get(obj);
       const referencePath = this.getRecursionPath(referenceKeys, referenceKeys.length);
       const path = this.getRecursionPath(keys, depth);
-      return str.replace(/return/, `${path}=${referencePath};return`);
+      return str + `${path}=${referencePath};`;
     }
     this.objects.set(obj, this.getRecursionKeys(keys));
     for (const [key, value] of Object.entries(obj)) {
       keys[depth] = `'${key}'`;
       str = this.resolveRecursion(str, value, keys, depth);
-      keys[depth] = undefined;
     }
-    return str;
+    if (!obj[protoKey]) {
+      return str;
+    }
+    // debug
+    str += '\n';
+    // resolve proto
+    keys[depth++] = `'${protoKey}'`;
+    const path = this.getRecursionPath(keys, depth);
+    const protoKeys = ['o', ...keys.slice(1, depth)];
+    const [key] = this.getKeyAndPath(protoKeys, depth);
+    return str + `${path}=${key};`;
   }
 
   private getRecursionKeys(keys: Key[]): Key[] {
@@ -152,9 +165,13 @@ export class Parser2<T> {
 
   private getRecursionPath(keys: Key[], depth: number) {
     let [path] = keys;
-    let i = 0;
-    while (++i < depth) {
-      path += `[${keys[i]}]`;
+    return path + this.getObjectPath(keys, 1, depth);
+  }
+
+  private getObjectPath(keys: Key[], start: number, end: number) {
+    let path = '';
+    while (start < end) {
+      path += `[${keys[start++]}]`;
     }
     return path;
   }

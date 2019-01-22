@@ -185,7 +185,6 @@ describe('#clone', () => {
     assert.notStrictEqual(newObj.b, obj1.b);
     assert.notStrictEqual(newObj.b.b, obj1.b.b);
   });
-  return;
 
   it('should copy class', () => {
     const Test = function(str) {
