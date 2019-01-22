@@ -1,6 +1,4 @@
-import { Parser } from './Parser';
-import { Parser2, Cloner } from './Parser2';
-import { createFunc } from './util';
+import { Parser, Cloner } from './Parser';
 
 type StrongType = string | number | boolean | undefined | null;
 type WeakType = object;
@@ -39,9 +37,7 @@ export class DeepCopy {
     if (map.has(key)) {
       throw new Error(`${key} is already defined.`);
     }
-    // const parser = new Parser(structure);
-    // const cloner = createFunc(parser.deep());
-    const cloner = new Parser2(structure).getCloner();
+    const cloner = new Parser(structure).getCloner();
     map.set(key, cloner);
     return cloner;
   }
