@@ -46,7 +46,6 @@ describe('#clone', () => {
     obj.d.d11 = 'test2';
     assert.notDeepEqual(newObj, obj);
   });
-  return;
 
   it('should copy deep array', () => {
     const obj = [
@@ -59,6 +58,7 @@ describe('#clone', () => {
     assert.deepEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
   });
+  return;
 
   it('should copy deep object', () => {
     const count = 10;

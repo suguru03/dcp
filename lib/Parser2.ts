@@ -1,5 +1,6 @@
 type DeepPartial<T> = { [P in keyof T]?: DeepPartial<T[P]> };
 type Cloner<T> = (obj?: DeepPartial<T>) => T;
+type Key = string | number;
 
 export class Parser2<T> {
   private readonly objects: Set<any> = new Set();
@@ -19,7 +20,7 @@ export class Parser2<T> {
     console.log('init:', require('util').inspect(this.cloner(), false, null));
   }
 
-  private parse<T>(obj: T, keys: string[], depth: number) {
+  private parse<T>(obj: T, keys: Key[], depth: number) {
     depth++;
     let init: any;
     switch (typeof obj) {
@@ -52,16 +53,29 @@ export class Parser2<T> {
     return `${key}!==u?${path}:${init}`;
   }
 
-  private parseArray<T>(obj: T[], keys: string[], depth: number) {}
+  private parseArray<T>(arr: T[], keys: Key[], depth: number) {
+    let str = '[';
+    const l = arr.length;
+    for (let i = 0; i < l; i++) {
+      // debug
+      // str += '\n  ';
+      keys[depth] = i;
+      str += `${this.parse(arr[i], keys, depth)}`;
+      if (i !== l - 1) {
+        str += ',';
+      }
+    }
+    str += ']';
+    return str;
+  }
 
-  private parseObject<T>(obj: T, keys: string[], depth: number) {
+  private parseObject<T>(obj: T, keys: Key[], depth: number) {
     let str = '{';
     const objKeys = Object.keys(obj);
     const l = objKeys.length;
     for (let i = 0; i < l; i++) {
       // debug
       // str += '\n  ';
-
       const k = objKeys[i];
       const v = obj[k];
       const ks = `'${k}'`;
@@ -76,7 +90,7 @@ export class Parser2<T> {
   }
 
   // TODO: cache
-  private resolveKey(keys: string[], depth: number) {
+  private resolveKey(keys: Key[], depth: number) {
     let [key] = keys;
     let path = key;
     let i = 0;
