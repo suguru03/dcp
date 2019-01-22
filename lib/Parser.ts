@@ -22,12 +22,17 @@ export class Parser<T> {
 
   private createCloner<T>(obj: T) {
     const arg = 'o';
-    let str = `{let u, p='${protoKey}',r=${this.parse(obj, [arg], 0)};`;
+    const prefix = `{let u,`;
+    let main = `r=${this.parse(obj, [arg], 0)};`;
+    const suffix = ' return r};';
     if (this.hasRecursion || this.hasProto) {
+      if (this.hasProto) {
+        main = `p='${protoKey}',${main}`;
+      }
       this.objects.clear();
-      str = this.resolveRecursion(str, obj, ['r'], 0);
+      main = this.resolveRecursion(main, obj, ['r'], 0);
     }
-    str += ' return r};';
+    const str = `${prefix}${main}${suffix}`;
     this.cloner = new Function(arg, str) as any;
   }
 
@@ -147,7 +152,7 @@ export class Parser<T> {
     // debug
     str += '\n';
     // resolve proto
-    keys[depth++] = `'${protoKey}'`;
+    keys[depth++] = 'p';
     const path = this.getRecursionPath(keys, depth);
     const protoKeys = ['o', ...keys.slice(1, depth)];
     const [key] = this.getKeyAndPath(protoKeys, depth);
