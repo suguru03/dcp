@@ -3,6 +3,7 @@ type Key = string | number;
 export type Cloner<T> = (obj?: DeepPartial<T>) => T;
 
 const protoKey = '__proto__';
+const protoSet = new Set([Object.prototype, Array.prototype]);
 
 export class Parser<T> {
   private readonly objects: Map<any, Key[]> = new Map();
@@ -21,7 +22,7 @@ export class Parser<T> {
 
   private createCloner<T>(obj: T) {
     const arg = 'o';
-    let str = `{let u, r=${this.parse(obj, [arg], 0)};`;
+    let str = `{let u, p='${protoKey}',r=${this.parse(obj, [arg], 0)};`;
     if (this.hasRecursion || this.hasProto) {
       this.objects.clear();
       str = this.resolveRecursion(str, obj, ['r'], 0);
@@ -85,8 +86,12 @@ export class Parser<T> {
       }
     }
     str += '}';
-    this.hasProto = this.hasProto || !!obj[protoKey];
+    this.hasProto = this.hasProto || this.checkProto(obj);
     return str;
+  }
+
+  private checkProto<T>(obj: T): boolean {
+    return !protoSet.has(obj[protoKey]);
   }
 
   private parseArray<T>(arr: T[], keys: Key[], depth: number) {
@@ -136,7 +141,7 @@ export class Parser<T> {
       keys[depth] = `'${key}'`;
       str = this.resolveRecursion(str, value, keys, depth);
     }
-    if (!obj[protoKey]) {
+    if (!this.checkProto(obj)) {
       return str;
     }
     // debug
