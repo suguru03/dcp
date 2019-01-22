@@ -26,7 +26,7 @@ describe('#clone', () => {
     assert.strictEqual(str, newStr);
   });
 
-  it('should copy deeply', () => {
+  it.only('should copy deeply', () => {
     const structure = {
       a: 1,
       b: [1, 2],
@@ -46,6 +46,7 @@ describe('#clone', () => {
     obj.d.d11 = 'test2';
     assert.notDeepEqual(newObj, obj);
   });
+  return;
 
   it('should copy deep array', () => {
     const obj = [
