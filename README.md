@@ -8,7 +8,7 @@ This module supports making copy / clone deeply and faster.
 
 ### Runtime parsing
 
-If the base object refernce is NOT changed, you can use it without defining a key.
+If the reference of the base object is NOT changed, you can use it without defining a key.
 
 ```js
 const obj = {
@@ -29,7 +29,7 @@ const newObj = dcp.clone(obj);
 
 ### Runtime parsing with a key
 
-If the object reference is changed but the format is the same, you need to use it with a key.
+If the reference is changed but the format is the same, you need to use it with a key.
 
 ```js
 // only first time, it will be parsed
@@ -73,7 +73,7 @@ const newObj = dcp.clone(key, obj);
 - benchmark.js: v2.1.0
 
 ```js
-var obj = {
+const obj = {
   a: 1,
   b: 'test',
   c: [true, false, { c1: 'a' }],
@@ -91,11 +91,9 @@ _.cloneDeep(obj);
  * [3] "cloneDeep" 0.041ms [78.5]
  */
 
-var obj = _.mapValues(_.times(10), function(num) {
-  return _.mapValues(_.times(num), function(num) {
-    return _.mapValues(_.times(num));
-  });
-});
+const obj = _.mapValues(_.times(count), num =>
+  _.mapValues(_.times(num), num => _.mapValues(_.times(num))),
+);
 /*
  * **** benchmark.js ****
  * [1] "dcp" 0.15ms [1.00]

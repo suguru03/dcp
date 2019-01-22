@@ -6,6 +6,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
+    "declaration": true,
     "noImplicitReturns": true
   },
   "include": ["./index.ts", "lib"]
