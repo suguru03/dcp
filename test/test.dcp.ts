@@ -103,7 +103,6 @@ describe('#clone', () => {
     });
     assert.notStrictEqual(newObj, obj);
   });
-  return;
 
   it('should make default values', () => {
     const structure = {
@@ -186,6 +185,7 @@ describe('#clone', () => {
     assert.notStrictEqual(newObj.b, obj1.b);
     assert.notStrictEqual(newObj.b.b, obj1.b.b);
   });
+  return;
 
   it('should copy class', () => {
     const Test = function(str) {
