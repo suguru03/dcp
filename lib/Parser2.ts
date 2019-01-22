@@ -1,6 +1,6 @@
 type DeepPartial<T> = { [P in keyof T]?: DeepPartial<T[P]> };
-type Cloner<T> = (obj?: DeepPartial<T>) => T;
 type Key = string | number;
+export type Cloner<T> = (obj?: DeepPartial<T>) => T;
 
 export class Parser2<T> {
   private readonly objects: Set<any> = new Set();
@@ -8,6 +8,10 @@ export class Parser2<T> {
   constructor(obj: T) {
     this.createCloner(obj);
     this.objects = null;
+  }
+
+  getCloner() {
+    return this.cloner;
   }
 
   private createCloner<T>(obj: T) {
@@ -58,7 +62,7 @@ export class Parser2<T> {
     const l = arr.length;
     for (let i = 0; i < l; i++) {
       // debug
-      // str += '\n  ';
+      str += '\n  ';
       keys[depth] = i;
       str += `${this.parse(arr[i], keys, depth)}`;
       if (i !== l - 1) {
@@ -75,7 +79,7 @@ export class Parser2<T> {
     const l = objKeys.length;
     for (let i = 0; i < l; i++) {
       // debug
-      // str += '\n  ';
+      str += '\n  ';
       const k = objKeys[i];
       const v = obj[k];
       const ks = `'${k}'`;
@@ -95,9 +99,8 @@ export class Parser2<T> {
     let path = key;
     let i = 0;
     while (++i < depth) {
-      const k = `[${keys[i]}]`;
-      key += `&&${k}`;
-      path += k;
+      path += `[${keys[i]}]`;
+      key += `&&${path}`;
     }
     return [key, path];
   }

@@ -1,9 +1,6 @@
 import { Parser } from './Parser';
-import { Parser2 } from './Parser2';
+import { Parser2, Cloner } from './Parser2';
 import { createFunc } from './util';
-
-type DeepPartial<T> = { [P in keyof T]?: DeepPartial<T[P]> };
-type Cloner<T> = (obj?: DeepPartial<T>) => T;
 
 type StrongType = string | number | boolean | undefined | null;
 type WeakType = object;
@@ -42,9 +39,9 @@ export class DeepCopy {
     if (map.has(key)) {
       throw new Error(`${key} is already defined.`);
     }
-    new Parser2(structure);
-    const parser = new Parser(structure);
-    const cloner = createFunc(parser.deep());
+    // const parser = new Parser(structure);
+    // const cloner = createFunc(parser.deep());
+    const cloner = new Parser2(structure).getCloner();
     map.set(key, cloner);
     return cloner;
   }

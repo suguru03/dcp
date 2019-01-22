@@ -58,7 +58,6 @@ describe('#clone', () => {
     assert.deepEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
   });
-  return;
 
   it('should copy deep object', () => {
     const count = 10;
@@ -104,6 +103,7 @@ describe('#clone', () => {
     });
     assert.notStrictEqual(newObj, obj);
   });
+  return;
 
   it('should make default values', () => {
     const structure = {
