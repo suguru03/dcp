@@ -186,7 +186,7 @@ describe('#clone', () => {
     assert.notStrictEqual(newObj.b.b, obj1.b.b);
   });
 
-  it('should copy class', () => {
+  it('should copy an instance', () => {
     const Test = function(str) {
       this._str = str;
     };
@@ -205,6 +205,24 @@ describe('#clone', () => {
     assert.notStrictEqual(newObj, test);
     assert.strictEqual(newObj.get(), test.get());
     assert.strictEqual(newObj.set('test2').get(), test.set('test2').get());
+  });
+
+  it('should copy a deep instance', () => {
+    const Test = function(str) {
+      this._str = str;
+    };
+    Test.prototype.get = function() {
+      return this._str;
+    };
+    const Test2 = function(str) {
+      this._test = new Test(str);
+    };
+    Test2.prototype.get = function() {
+      return this._test;
+    };
+    const test = new Test2('test');
+    const newObj = dcp.clone(test);
+    assert.strictEqual(newObj._test.__proto__, test._test.__proto__);
   });
 
   it('should copy using reference type', () => {
