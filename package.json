@@ -3,8 +3,9 @@
   "version": "0.1.4",
   "description": "",
   "main": "index.js",
+  "private": true,
   "scripts": {
-    "build": "rm -rf dist && yarn tsc && cp package.json dist/package.json",
+    "build": "tsp build",
     "test": "mocha test/**/*.ts"
   },
   "author": "Suguru Motegi <suguru.motegi@gmail.com>",
@@ -19,6 +20,7 @@
     "mocha": "^5.2.0",
     "prettier": "^1.15.3",
     "ts-node": "^7.0.1",
+    "ts-publisher": "^0.1.1",
     "typescript": "^3.2.2"
   },
   "husky": {
