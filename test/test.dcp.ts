@@ -14,7 +14,7 @@ describe('#define', () => {
     const clone = dcp.define('test', obj);
     assert.strictEqual(typeof clone, 'function');
     const newObj = clone(obj);
-    assert.deepEqual(newObj, obj);
+    assert.deepStrictEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
   });
 });
@@ -41,32 +41,28 @@ describe('#clone', () => {
     };
     const clone = dcp.define('test', structure);
     const newObj = clone(obj);
-    assert.deepEqual(newObj, obj);
+    assert.deepStrictEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
     obj.d.d11 = 'test2';
     assert.notDeepEqual(newObj, obj);
   });
 
   it('should copy deep array', () => {
-    const obj = [
-      1,
-      [[1, '2', true, false, () => {}]],
-      [4, { d: { d1: () => {} } }, [5, { e: [false] }]],
-    ];
+    const obj = [1, [[1, '2', true, false, () => {}]], [4, { d: { d1: () => {} } }, [5, { e: [false] }]]];
     const clone = dcp.define('test', obj);
     const newObj = clone(obj);
-    assert.deepEqual(newObj, obj);
+    assert.deepStrictEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
   });
 
   it('should copy deep object', () => {
     const count = 10;
-    const obj = _.mapValues(_.times(count), num =>
-      _.mapValues(_.times(num), num => _.mapValues(_.times(num))),
+    const obj = _.mapValues(_.times(count), (num: number) =>
+      _.mapValues(_.times(num), (num: number) => _.mapValues(_.times(num))),
     );
     const clone = dcp.define('test', obj);
     const newObj = clone(obj);
-    assert.deepEqual(newObj, obj);
+    assert.deepStrictEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
   });
 
@@ -80,7 +76,7 @@ describe('#clone', () => {
     const func = dcp.define('test', obj);
     assert.strictEqual(typeof func, 'function');
     const newObj = func(obj);
-    assert.deepEqual(newObj, obj);
+    assert.deepStrictEqual(newObj, obj);
     assert.notStrictEqual(newObj, obj);
   });
 
@@ -96,7 +92,7 @@ describe('#clone', () => {
     };
     const clone = dcp.define('test', structure);
     const newObj = clone(obj);
-    assert.deepEqual(newObj, {
+    assert.deepStrictEqual(newObj, {
       a: 5,
       b: 0,
       c: 5,
@@ -118,7 +114,7 @@ describe('#clone', () => {
     };
     dcp.define('test', structure);
     const newObj = dcp.clone('test', obj);
-    assert.deepEqual(newObj, {
+    assert.deepStrictEqual(newObj, {
       a: 10,
       b: '',
       c: [1, { c1: [{}, { c12: false }] }],
@@ -138,7 +134,7 @@ describe('#clone', () => {
     };
     const clone = dcp.define('test', structure);
     const newObj = clone();
-    assert.deepEqual(newObj, {
+    assert.deepStrictEqual(newObj, {
       a: 0,
       b: '',
       c: [undefined, { c1: [{}, { c12: false }] }],
@@ -158,7 +154,7 @@ describe('#clone', () => {
     obj.b = obj2;
     const clone = dcp.define('test', obj);
     const newObj = clone(obj);
-    assert.deepEqual(newObj, obj);
+    assert.deepStrictEqual(newObj, obj);
     assert.notStrictEqual(newObj.b, obj.b);
     assert.notStrictEqual(newObj.b.b, obj.b.b);
   });
@@ -181,7 +177,7 @@ describe('#clone', () => {
     obj3.c = obj1;
     const clone = dcp.define('test', obj1);
     const newObj = clone(obj1);
-    assert.deepEqual(newObj, obj1);
+    assert.deepStrictEqual(newObj, obj1);
     assert.notStrictEqual(newObj.b, obj1.b);
     assert.notStrictEqual(newObj.b.b, obj1.b.b);
   });
@@ -199,7 +195,7 @@ describe('#clone', () => {
     };
     const test = new Test('test');
     const newObj = dcp.clone('test', test);
-    assert.deepEqual(newObj, test);
+    assert.deepStrictEqual(newObj, test);
     assert.strictEqual(newObj.__proto__, test.__proto__);
     assert.notStrictEqual(newObj, test);
     assert.notStrictEqual(newObj, test);
