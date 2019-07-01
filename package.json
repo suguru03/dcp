@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "tsp build",
-    "test": "mocha test/**/*.ts"
+    "test": "TS_NODE_TRANSPILE_ONLY=1 mocha test/**/*.ts"
   },
   "author": "Suguru Motegi <suguru.motegi@gmail.com>",
   "license": "MIT",
@@ -21,7 +21,7 @@
     "prettier": "^1.15.3",
     "ts-node": "^7.0.1",
     "ts-publisher": "^0.1.1",
-    "typescript": "^3.2.2"
+    "typescript": "^3.5.2"
   },
   "husky": {
     "hooks": {
@@ -35,7 +35,7 @@
     ]
   },
   "prettier": {
-    "printWidth": 100,
+    "printWidth": 120,
     "singleQuote": true,
     "trailingComma": "all"
   }
