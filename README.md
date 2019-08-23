@@ -4,6 +4,20 @@
 
 This module supports making copy / clone deeply and faster.
 
+## Benchmark
+
+- Node.js: v12.7.0
+- benchmark.js: v2.1.0
+
+```js
+yarn benchmark
+
+[1] "dcp" 0.0665μs[1.00][1.00]
+[2] "JSON" 3.73μs[0.0178][56.1]
+[3] "lodash" 3.76μs[0.0177][56.6]
+```
+
+
 ## Usage
 
 ### Runtime parsing
@@ -65,41 +79,6 @@ const structure = {
 const key = 'test';
 dcp.define(key, structure);
 const newObj = dcp.clone(key, obj);
-```
-
-## Benchmark
-
-- Node.js: v6.2.0
-- benchmark.js: v2.1.0
-
-```js
-const obj = {
-  a: 1,
-  b: 'test',
-  c: [true, false, { c1: 'a' }],
-  d: { d1: { d11: { d111: { d1111: 0 }, d112: 1 } } }
-};
-dcp.define('test', obj);
-
-dcp.clone('test', obj);
-JSON.parse(JSON.stringify(obj));
-_.cloneDeep(obj);
-/*
- * **** benchmark.js ****
- * [1] "dcp" 0.00052ms [1.00]
- * [2] "JSON.parse" 0.020ms [37.6]
- * [3] "cloneDeep" 0.041ms [78.5]
- */
-
-const obj = _.mapValues(_.times(count), num =>
-  _.mapValues(_.times(num), num => _.mapValues(_.times(num))),
-);
-/*
- * **** benchmark.js ****
- * [1] "dcp" 0.15ms [1.00]
- * [2] "JSON.parse" 0.47ms [3.11]
- * [3] "cloneDeep" 1.1ms [7.55]
- */
 ```
 
 ## APIs
