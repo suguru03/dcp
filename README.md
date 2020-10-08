@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/dcp.svg)](https://www.npmjs.com/package/dcp)
 
-This module supports making copy / clone deeply and faster.
+This module supports making shallow copy / deep copy and faster IF an object structure is consistent.
 
 ## Benchmark
 
@@ -23,7 +23,7 @@ yarn benchmark
 
 ### Runtime parsing
 
-If the reference of the base object is NOT changed, you can use it without defining a key.
+It creates a snapshot when the object is copied the first time, the snapshot will be stored in WeakMap.
 
 ```js
 const obj = {
@@ -32,7 +32,6 @@ const obj = {
   d: {}
 };
 
-// only first time, it will be parsed
 const newObj = dcp.clone(obj);
 /*
  * { a: 10,
@@ -44,10 +43,11 @@ const newObj = dcp.clone(obj);
 
 ### Runtime parsing with a key
 
-If the reference is changed but the format is the same, you need to use it with a key.
+If the object reference is changed every time, you can assign a specific key for the snapshot.
+
+Then you will be able to resuse the snapshot for other objects.
 
 ```js
-// only first time, it will be parsed
 const newObj = dcp.clone('key1', obj);
 /*
  * { a: 10,
@@ -68,7 +68,7 @@ const newObj2 = dcp.clone('key1');
 
 ### Pre-defined
 
-It is the fastest way, but the difference is only the first clone.
+You can also define a snapshot structure before using copy.
 
 ```js
 const structure = {
@@ -89,13 +89,11 @@ const newObj = dcp.clone(key, obj);
 arguments: (key: any, structure: any)
 arguments: (structure: any)
 
-If it is called, functions which have the structure will be made.
+Pre define a snapshot structure
 
 ### clone
 
 arguments: (key: any, structure: any)
 arguments: (structure: any)
 
-The deep clone will be made by defined structure.
-If the key isn't defined, `define` will be called and then the deep clone function will be called.
-
+Create a copy based on a snapshot
