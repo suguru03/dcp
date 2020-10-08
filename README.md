@@ -21,6 +21,19 @@ yarn benchmark
 
 ## Usage
 
+```
+npm install dcp
+// or
+yarn add dcp
+```
+
+```js
+const { dcp } = require('dcp');
+// or 
+import dcp from 'dcp';
+import { dcp } from 'dcp';
+```
+
 ### Runtime parsing
 
 It creates a snapshot when the object is copied the first time, the snapshot will be stored in WeakMap.
