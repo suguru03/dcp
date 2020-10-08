@@ -10,6 +10,7 @@
     "benchmark": "TS_NODE_TRANSPILE_ONLY=1 ts-node benchmark"
   },
   "author": "Suguru Motegi <suguru.motegi@gmail.com>",
+  "homepage": "https://github.com/suguru03/dcp",
   "license": "MIT",
   "devDependencies": {
     "@types/benchmark": "^1.0.31",
@@ -24,9 +25,10 @@
     "minimist": "^1.2.0",
     "mocha": "^5.2.0",
     "prettier": "^1.15.3",
+    "rfdc": "^1.1.4",
     "ts-node": "^7.0.1",
     "ts-publisher": "^0.1.1",
-    "typescript": "^3.5.2"
+    "typescript": "^3.7.2"
   },
   "husky": {
     "hooks": {

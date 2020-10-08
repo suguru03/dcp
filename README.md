@@ -6,15 +6,16 @@ This module supports making copy / clone deeply and faster.
 
 ## Benchmark
 
-- Node.js: v12.7.0
+- Node.js: v14.13.1
 - benchmark.js: v2.1.0
 
 ```js
 yarn benchmark
 
-[1] "dcp" 0.0665μs[1.00][1.00]
-[2] "JSON" 3.73μs[0.0178][56.1]
-[3] "lodash" 3.76μs[0.0177][56.6]
+[1] "dcp" 0.0636μs[1.00][1.00]
+[2] "rfdc" 0.825μs[0.0771][13.0]
+[3] "lodash" 3.81μs[0.0167][59.9]
+[4] "JSON" 3.85μs[0.0165][60.6]
 ```
 
 

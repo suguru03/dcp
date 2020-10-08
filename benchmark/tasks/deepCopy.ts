@@ -1,6 +1,6 @@
 import { Functions } from '../';
 
-export default ({ _, dcp }: Functions) => ({
+export default ({ _, rfdc, dcp }: Functions) => ({
   example1: {
     setup() {
       const obj = {
@@ -17,6 +17,7 @@ export default ({ _, dcp }: Functions) => ({
       lodash: ({ obj }) => _.cloneDeep(obj),
       dcp: ({ obj }) => dcp.clone(obj),
       JSON: ({ obj }) => JSON.parse(JSON.stringify(obj)),
+      rfdc: ({ obj }) => rfdc(obj),
     },
   },
 });

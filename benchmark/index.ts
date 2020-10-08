@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import * as rfdc from 'rfdc';
 import { Suite } from 'benchmark';
 import * as minimist from 'minimist';
 
@@ -7,10 +8,11 @@ import * as tasks from './tasks';
 
 export interface Functions {
   _: _.LoDashStatic;
+  rfdc: any;
   dcp: DeepCopy;
 }
 
-const funcs = { _, dcp };
+const funcs = { _, rfdc: rfdc(), dcp };
 
 const argv = minimist(process.argv.slice(2));
 
