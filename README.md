@@ -1,7 +1,5 @@
 # dcp
 
-[![npm](https://img.shields.io/npm/v/dcp.svg)](https://www.npmjs.com/package/dcp)
-
 This module supports making shallow copy / deep copy and faster IF an object structure is consistent.
 
 ## Benchmark
@@ -21,10 +19,11 @@ yarn benchmark
 
 ## Usage
 
+⚠ The package is no longer available in the npm registry. Please download it from this repository instead.
 ```
-npm install dcp
+npm install suguru03/dcp
 // or
-yarn add dcp
+yarn add suguru03/dcp
 ```
 
 ```js
